@@ -1,0 +1,19 @@
+{
+    "cSpell.words": [
+        "Autofac",
+        "Iodc",
+        "Isin",
+        "Sicav",
+        "autobind",
+        "immer",
+        "manco",
+        "navs",
+        "oidc",
+        "signin",
+        "signout"
+    ],
+    "files.exclude": {
+        "*/bin": true,
+        "*/obj": true,
+    }
+}

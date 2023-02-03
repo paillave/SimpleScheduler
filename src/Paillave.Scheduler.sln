@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Paillave.Scheduler.Core", "Paillave.Scheduler.Core\Paillave.Scheduler.Core.csproj", "{6B43E04B-E331-40CE-A34E-E6D6731BF859}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Paillave.Scheduler.Example", "Paillave.Scheduler.Example\Paillave.Scheduler.Example.csproj", "{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B43E04B-E331-40CE-A34E-E6D6731BF859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B43E04B-E331-40CE-A34E-E6D6731BF859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B43E04B-E331-40CE-A34E-E6D6731BF859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B43E04B-E331-40CE-A34E-E6D6731BF859}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
