@@ -1,0 +1,31 @@
+POST https://localhost:7137/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "name":"batch1",
+    "cronExpression":"* * * * *"
+}
+
+###
+
+GET https://localhost:7137/ HTTP/1.1
+
+###
+
+POST https://localhost:7137/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 1,
+    "name":"batch1",
+    "cronExpression":"*/2 * * * *",
+    "command":"gedit"
+}
+
+###
+
+DELETE https://localhost:7137/1 HTTP/1.1
+
+###
+
+PUT https://localhost:7137/1 HTTP/1.1

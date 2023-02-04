@@ -7,7 +7,6 @@ internal class TickEmitter<TJobDefinition> : IDisposable
     {
         private CancellationTokenSource _internalCancellationTokenSource;
         private CancellationTokenSource _combinedCancellationTokenSource;
-        // private System.Timers.Timer? _timer = null;
         public TickRunningContext(CancellationToken externalCancellationToken, Action onStop)
         {
             _internalCancellationTokenSource = new CancellationTokenSource();
@@ -32,12 +31,12 @@ internal class TickEmitter<TJobDefinition> : IDisposable
         private readonly Action<TickSubscription> _unsubscribe;
         public Action<TJobDefinition> Push { get; }
     }
-    public void UpdateSource(TJobDefinition? source = default)
+    public void UpdateSource(TJobDefinition? jobDefinition = default)
     {
-        source ??= this.Source;
+        jobDefinition ??= this.JobDefinition;
         lock (this._syncObject)
         {
-            this.Source = source;
+            this.JobDefinition = jobDefinition;
             if (Running) Restart();
         }
     }
@@ -55,13 +54,13 @@ internal class TickEmitter<TJobDefinition> : IDisposable
     private bool disposedValue;
     private readonly object _syncObject = new Object();
     private System.Timers.Timer? _timer = null;
-    public TJobDefinition Source { get; private set; }
+    public TJobDefinition JobDefinition { get; private set; }
     private readonly List<TickSubscription> _subscriptions = new List<TickSubscription>();
     private Func<TJobDefinition, string?> _getCronExpression;
     private TickRunningContext? _runningContext = null;
     public bool Running => _runningContext != null;
     public TickEmitter(TJobDefinition sourceMetadata, Func<TJobDefinition, string?> getCronExpression)
-        => (Source, _getCronExpression) = (sourceMetadata, getCronExpression);
+        => (JobDefinition, _getCronExpression) = (sourceMetadata, getCronExpression);
     public IDisposable Subscribe(Action<TJobDefinition> push)
     {
         var tickSubscription = new TickSubscription(push, ts => _subscriptions.Remove(ts));
@@ -83,7 +82,7 @@ internal class TickEmitter<TJobDefinition> : IDisposable
     {
         lock (this._syncObject)
         {
-            var cronExpression = this._getCronExpression(this.Source);
+            var cronExpression = this._getCronExpression(this.JobDefinition);
             if (cronExpression == null) return;
             var next = CronExpression.Parse(cronExpression).GetNextOccurrence(now.ToUniversalTime(), TimeZoneInfo.Local);
             if (next == null) return;
@@ -103,7 +102,7 @@ internal class TickEmitter<TJobDefinition> : IDisposable
             _timer.Dispose();
             _timer = null;
             foreach (var subscription in _subscriptions)
-                Task.Run(() => subscription.Push(this.Source), cancellationToken);
+                Task.Run(() => subscription.Push(this.JobDefinition), cancellationToken);
             this.ScheduleNextTick(cancellationToken, now);
         }
     }

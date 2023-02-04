@@ -5,6 +5,10 @@
             "name": "Sources"
         },
         {
+            "path": "documentation",
+            "name": "Docs"
+        },
+        {
             "path": ".",
             "name": "Root"
         },

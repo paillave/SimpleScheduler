@@ -5,15 +5,35 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "WebApi",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Paillave.Scheduler.TestApi/bin/Debug/net6.0/Paillave.Scheduler.TestApi.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Paillave.Scheduler.TestApi",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
             "name": "Scheduler",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Paillave.Scheduler.Example/bin/Debug/net6.0/Paillave.Scheduler.Example.dll",
-            "args": [            ],
+            "args": [],
             "cwd": "${workspaceFolder}/Paillave.Scheduler.Example",
             "stopAtEntry": false,
             "console": "externalTerminal"
         }
-   ]
+    ]
 }

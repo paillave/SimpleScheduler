@@ -4,4 +4,6 @@ public interface IJobDefinitionService<TJobDefinition, TKey> where TKey : IEquat
 {
     void SetJobDefinition(TJobDefinition source);
     void UnSetJobDefinition(TKey key);
+    void ResyncJobDefinitions();
+    void Trigger(TKey key);
 }

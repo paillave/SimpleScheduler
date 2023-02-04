@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Paillave.Scheduler.Core", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Paillave.Scheduler.Example", "Paillave.Scheduler.Example\Paillave.Scheduler.Example.csproj", "{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Paillave.Scheduler.TestApi", "Paillave.Scheduler.TestApi\Paillave.Scheduler.TestApi.csproj", "{DC9E3109-E8F8-41BB-8ACD-0F8F837C5F54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C609FFA-C40C-4115-BC9A-192DA9FB1BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC9E3109-E8F8-41BB-8ACD-0F8F837C5F54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC9E3109-E8F8-41BB-8ACD-0F8F837C5F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC9E3109-E8F8-41BB-8ACD-0F8F837C5F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC9E3109-E8F8-41BB-8ACD-0F8F837C5F54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

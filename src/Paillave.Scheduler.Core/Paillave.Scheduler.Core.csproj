@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Paillave.Scheduler.Core</PackageId>
-    <Version>1.0.0-beta</Version>
+    <Version>1.0.1-beta</Version>
     <Authors>Stéphane Royer</Authors>
     <Company></Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>

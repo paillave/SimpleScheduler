@@ -1,18 +1,11 @@
 namespace Paillave.Scheduler.Core;
-internal static class TickEmitterService
-{
-    public static TickEmitterService<TSource, TKey> Create<TSource, TKey>(TickEmitterHub<TSource, TKey> tickSourceConnection) where TKey : IEquatable<TKey>
-        => new TickEmitterService<TSource, TKey>(tickSourceConnection);
-}
-
-internal class TickEmitterService<TSource, TKey> : IDisposable where TKey : IEquatable<TKey>
+internal class TickEmitterService<TJobDefinition, TKey> : IDisposable where TKey : IComparable<TKey>, IEquatable<TKey>
 {
     private class SourceOccurrence : IDisposable
     {
-        public SourceOccurrence(TickEmitter<TSource> tickSource, IDisposable releaser) => (TickSource, Releaser) = (tickSource, releaser);
-        public TickEmitter<TSource> TickSource { get; }
+        public SourceOccurrence(TickEmitter<TJobDefinition> tickSource, IDisposable releaser) => (TickSource, Releaser) = (tickSource, releaser);
+        public TickEmitter<TJobDefinition> TickSource { get; }
         public IDisposable Releaser { get; }
-
         public void Dispose()
         {
             this.Releaser.Dispose();
@@ -30,83 +23,81 @@ internal class TickEmitterService<TSource, TKey> : IDisposable where TKey : IEqu
             item.Value.TickSource.Stop();
     }
     private readonly object _lock = new object();
-    private readonly TickEmitterHub<TSource, TKey> _sourceConnection;
-    public event EventHandler<TSource>? Tick = null;
-    protected virtual void OnPushTick(TSource source)
-        => this.Tick?.Invoke(this, source);
-    public TickEmitterService(TickEmitterHub<TSource, TKey> sourceConnection)
+    private readonly IBatchSetup<TJobDefinition, TKey> _tickEmitterProvider;
+    private readonly CancellationToken _stoppingToken;
+    protected virtual void OnPushTick(TJobDefinition source)
+        => Task.Run(() => this._tickEmitterProvider.Execute(source, _stoppingToken));
+    public TickEmitterService(IBatchSetup<TJobDefinition, TKey> tickEmitterProvider, CancellationToken stoppingToken)
     {
-        _sourceConnection = sourceConnection;
-        sourceConnection.Changed += this.HandleSourceChange;
-        this.ResetSources(this._sourceConnection.GetAll());
-    }
-    private void HandleSourceChange(object? sender, ITJobDefinitionChange<TSource, TKey> change)
-    {
-        lock (_lock)
-        {
-            switch (change)
-            {
-                case RemoveJobDefinitionChange<TSource, TKey> removeSourceChange:
-                    RemoveSource(removeSourceChange.Key);
-                    break;
-                case SaveJobDefinitionChange<TSource, TKey> saveSourceChange:
-                    ResetSource(saveSourceChange.Source);
-                    break;
-            }
-        }
+        _stoppingToken = stoppingToken;
+        _stoppingToken.Register(this.Stop);
+        _tickEmitterProvider = tickEmitterProvider;
+        this.ResetJobDefinitions(this._tickEmitterProvider.GetAll());
     }
     private readonly Dictionary<TKey, SourceOccurrence> _tickSources = new Dictionary<TKey, SourceOccurrence>();
     private bool disposedValue;
 
-    public void ResetSource(TSource source)
+    public void UpdateJobDefinition(TJobDefinition source)
     {
         lock (_lock)
         {
-            if (_tickSources.TryGetValue(_sourceConnection.GetKey(source), out var occurrence)) occurrence.TickSource.UpdateSource(source);
-            else AddSource(source);
+            if (_tickSources.TryGetValue(_tickEmitterProvider.GetKey(source), out var occurrence)) occurrence.TickSource.UpdateSource(source);
+            else AddJobDefinition(source);
         }
     }
-    private void AddSource(TSource source)
-    {
-        lock (_lock)
-        {
-            var tickSource = new TickEmitter<TSource>(source, _sourceConnection.GetCronExpression);
-            var releaser = tickSource.Subscribe(OnPushTick);
-            var occurrence = new SourceOccurrence(tickSource, releaser);
-            _tickSources[_sourceConnection.GetKey(source)] = occurrence;
-            tickSource.Start();
-        }
-    }
-    private void RemoveSource(TKey sourceKey)
+    public void RemoveJobDefinition(TKey sourceKey)
     {
         lock (_lock)
         {
             if (!_tickSources.TryGetValue(sourceKey, out var occurrence)) return;
             if (occurrence == null) return;
-            RemoveSource(occurrence);
+            RemoveJobDefinition(occurrence);
         }
     }
-    private void RemoveSource(SourceOccurrence occurrence)
+    public void RefreshJobDefinitions()
+    {
+        lock (_lock)
+        {
+            this.ResetJobDefinitions(this._tickEmitterProvider.GetAll());
+        }
+    }
+    public void Trigger(TKey key)
+    {
+        if (_tickSources.TryGetValue(key, out var jobDefinition))
+            OnPushTick(jobDefinition.TickSource.JobDefinition);
+    }
+    private void AddJobDefinition(TJobDefinition source)
+    {
+        lock (_lock)
+        {
+            var tickSource = new TickEmitter<TJobDefinition>(source, _tickEmitterProvider.GetCronExpression);
+            var releaser = tickSource.Subscribe(OnPushTick);
+            var occurrence = new SourceOccurrence(tickSource, releaser);
+            _tickSources[_tickEmitterProvider.GetKey(source)] = occurrence;
+            tickSource.Start();
+        }
+    }
+    private void RemoveJobDefinition(SourceOccurrence occurrence)
     {
         lock (_lock)
         {
             occurrence.Dispose();
-            _tickSources.Remove(_sourceConnection.GetKey(occurrence.TickSource.Source));
+            _tickSources.Remove(_tickEmitterProvider.GetKey(occurrence.TickSource.JobDefinition));
         }
     }
-    private void ResetSources(IEnumerable<TSource> newSources)
+    private void ResetJobDefinitions(IEnumerable<TJobDefinition> newSources)
     {
         lock (_lock)
         {
-            var updates = _tickSources.Join(newSources, i => i.Key, _sourceConnection.GetKey, (l, r) => new { Previous = l.Value.TickSource, New = r });
+            var updates = _tickSources.Join(newSources, i => i.Key, _tickEmitterProvider.GetKey, (l, r) => new { Previous = l.Value.TickSource, New = r });
             foreach (var tickSource in updates)
                 tickSource.Previous.UpdateSource(tickSource.New);
-            var toAdd = newSources.Where(n => !_tickSources.ContainsKey(_sourceConnection.GetKey(n))).ToList();
+            var toAdd = newSources.Where(n => !_tickSources.ContainsKey(_tickEmitterProvider.GetKey(n))).ToList();
             foreach (var item in toAdd)
-                AddSource(item);
-            var toRemove = _tickSources.Values.Where(i => !newSources.Any(n => _sourceConnection.GetKey(n).Equals(_sourceConnection.GetKey(i.TickSource.Source)))).ToList();
+                AddJobDefinition(item);
+            var toRemove = _tickSources.Values.Where(i => !newSources.Any(n => _tickEmitterProvider.GetKey(n).Equals(_tickEmitterProvider.GetKey(i.TickSource.JobDefinition)))).ToList();
             foreach (var item in toRemove)
-                RemoveSource(item);
+                RemoveJobDefinition(item);
         }
     }
     protected virtual void Dispose(bool disposing)
