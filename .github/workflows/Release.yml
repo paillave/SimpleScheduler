@@ -1,4 +1,4 @@
-name: ETL.NET - Release
+name: Scheduler.NET - Release
 
 on:
   release:

@@ -1,4 +1,4 @@
-name: ETL.NET - CI
+name: Scheduler.NET - CI
 
 on:
   push:
